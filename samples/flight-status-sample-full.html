@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flight Status | Sample</title>
+<link rel="icon" id="fav" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f2f2f1'/%3E%3Crect x='10' y='40' width='9' height='16' rx='2.5' fill='%2326312c'/%3E%3Crect x='22' y='32' width='9' height='24' rx='2.5' fill='%2326312c'/%3E%3Crect x='34' y='22' width='9' height='34' rx='2.5' fill='%23125740'/%3E%3Crect x='46' y='12' width='9' height='44' rx='2.5' fill='%230b0f0d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f2f1; --border:#d6dbd8; --muted:#66706a; --soft:#1f2925; --soft2:#36423c; --text:#0b0f0d;
+  --block:#26312c; --accent:#125740; --deep:#e3e8e5; --onblock:#ffffff;
+  --ok:#1f8a5b; --warn:#b5780c; --bad:#c2382c; --nodata:#66706a;
+  --ev-milestone:#0b0f0d; --ev-screen:#9aa39d; --ev-submit:#26312c; --ev-interview:#125740; --ev-feedback:#6aa88f;
+  --display:'Bricolage Grotesque','IBM Plex Sans','Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 'IBM Plex Sans','Segoe UI',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{max-width:1160px;margin:0 auto;padding:48px 44px 64px;display:flex;flex-wrap:wrap;gap:44px;align-items:flex-start}
+.side{flex:0 0 164px;position:sticky;top:20px;display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 40px);overflow-y:auto;scrollbar-width:none}
+.side::-webkit-scrollbar{display:none}
+.main{flex:1 1 560px;min-width:0;display:flex;flex-direction:column;gap:52px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand svg{flex:0 0 auto}
+.bn{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
+.bs{font-size:12px;color:var(--muted);margin-top:3px}
+.f{border-top:1px solid var(--border);padding:7px 0}
+.facts .f:last-child{border-bottom:1px solid var(--border)}
+.k{font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:1px}
+.v{font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.v small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.counts{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--soft2);padding:2px 0 4px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:9px;vertical-align:baseline}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(34px,5vw,52px);line-height:1.02;letter-spacing:-.03em}
+.hero{display:flex;flex-wrap:wrap;gap:28px 48px;align-items:flex-end}
+.big{font-family:var(--display);font-weight:800;font-size:clamp(110px,16vw,184px);line-height:.82;letter-spacing:-.05em;color:var(--accent)}
+.bigsub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:14px;color:var(--soft2);margin-top:16px}
+.head{flex:1 1 300px;min-width:0;margin:0;font-size:16.5px;line-height:1.62;color:var(--soft)}
+.lbl{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sec{display:flex;flex-direction:column;gap:14px}
+.status{font-weight:600}
+/* runway */
+.runway{position:relative;padding-top:34px}
+.plane{position:absolute;top:0;width:20px;height:20px}
+.tiles{display:flex;gap:4px}
+.t{flex:1;min-width:0;background:var(--block);color:var(--onblock);padding:14px 10px 12px}
+.t:first-child{border-radius:8px 0 0 8px}.t:last-child{border-radius:0 8px 8px 0}
+.t.cur{background:var(--accent)}
+.t.zero{background:var(--deep);color:var(--muted)}
+.tn{font-family:var(--display);font-weight:800;font-size:32px;line-height:1}
+.tl{font-size:11.5px;font-weight:500;margin-top:8px;line-height:1.3}
+.t.cur .tl{font-weight:600}
+.pt{font-size:10.5px;margin-top:5px;opacity:.78}
+/* metrics */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:28px}
+.m{border-top:1px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:8px}
+.m.flag{border-top-width:3px;padding-top:14px}
+.mv{font-family:var(--display);font-weight:700;font-size:50px;line-height:1;letter-spacing:-.03em}
+.ms{font-size:13px;color:var(--soft2)}
+.mn{font-size:12px;color:var(--muted);line-height:1.5}
+.src{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* velocity */
+.vr{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:11px 0;border-top:1px solid var(--border)}
+.vl{flex:0 0 250px;font-size:13.5px;color:var(--soft)}
+.vb{flex:1 1 140px;position:relative;height:10px;border-radius:5px;background:var(--deep)}
+.vb i{position:absolute;left:0;top:0;height:10px;border-radius:5px}
+.vb b{position:absolute;top:-4px;width:2px;height:18px;background:var(--text)}
+.vv{flex:0 0 130px;font-size:13px;text-align:right}
+.vv span{color:var(--muted)}
+/* source mix */
+.sm{display:flex;align-items:center;gap:6px 16px;padding:9px 0;border-top:1px solid var(--border)}
+.sm .sn{flex:0 0 150px;font-size:13.5px;color:var(--soft)}
+.sm .sb{flex:1 1 100px;height:6px;border-radius:3px;background:var(--deep);position:relative}
+.sm .sb i{position:absolute;left:0;top:0;height:6px;border-radius:3px;background:var(--block)}
+.sm .sv{flex:0 0 84px;text-align:right;font-size:13px;color:var(--soft)}
+.sm .sv span{color:var(--muted)}
+/* candidates */
+.c{display:flex;flex-wrap:wrap;gap:8px 24px;padding:16px 0;border-top:1px solid var(--border)}
+.c1{flex:0 0 150px}.c2{flex:0 0 150px}.c3{flex:1 1 260px;min-width:0}
+.cn{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.01em}
+.cs{font-size:12px;color:var(--muted);margin-top:3px}
+.cst{font-size:13.5px;font-weight:600;color:var(--accent)}
+.cd{font-size:12.5px;margin-top:3px}
+.csc{font-size:13.5px;color:var(--soft);line-height:1.5}
+.cdt{font-size:12px;color:var(--muted);margin-top:4px}
+.exits{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px}
+/* observations */
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:36px}
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px}
+.col{display:flex;flex-direction:column;gap:12px}
+.li{padding:11px 0 11px 14px;border-top:1px solid var(--border);border-left:3px solid var(--accent);margin-top:-1px;font-size:13.5px;line-height:1.55;color:var(--soft)}
+.li.w{border-left-color:var(--warn)}
+.li em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.04em;text-transform:uppercase}
+.sub3{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.sub3.w{color:var(--warn)}
+.none{font-size:13px;color:var(--muted);padding:11px 0;border-top:1px solid var(--border)}
+/* options */
+.o{display:flex;gap:20px;padding:18px 0;border-top:1px solid var(--border)}
+.on{font-family:var(--display);font-weight:800;font-size:44px;line-height:.9;color:var(--accent);flex:0 0 44px}
+.oh{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.01em}
+.op{font-size:14px;line-height:1.55;color:var(--soft);margin-top:6px}
+.ot{font-size:12px;color:var(--muted);margin-top:6px}
+/* confidence */
+.sr{display:flex;flex-wrap:wrap;gap:4px 16px;padding:9px 0;border-top:1px solid var(--border);font-size:12.5px}
+.sr div:nth-child(1){flex:0 0 150px;font-weight:500;color:var(--soft)}
+.sr div:nth-child(2){flex:0 0 190px;color:var(--muted)}
+.sr div:nth-child(3){flex:1 1 200px;color:var(--soft2)}
+.cf{font-size:12.5px;line-height:1.65;color:var(--soft2);border-top:1px solid var(--border);padding-top:12px}
+.cf b{color:var(--soft)}
+.foot{font-size:12px;color:var(--muted)}
+svg{display:block}
+@media(max-width:860px){
+  .side{position:static;flex:1 1 100%}
+  .facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));column-gap:20px}
+  .facts .f:last-child{border-bottom:0}
+  .counts{flex-direction:row;flex-wrap:wrap;gap:8px 18px}
+  .page{padding:28px 20px 48px;gap:28px}
+  .vl{flex-basis:100%}.vv{text-align:left}
+}
+@media(max-width:620px){.tl{font-size:10px}.tn{font-size:24px}.t{padding:10px 6px}.plane{display:none}.runway{padding-top:0}}
+@media print{
+  .side{position:static}
+  .page{padding:0}
+  .c,.o,.li,.m,.vr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="page" id="app"></div>
+
+<script>
+// ───────────────────────────────────────────────────────────────────────────
+// BRIEF_DATA: all content lives here. Swap this object to regenerate the page.
+// EVERYTHING BELOW IS FICTIONAL SAMPLE DATA.
+// ───────────────────────────────────────────────────────────────────────────
+const BRIEF_DATA = {
+ "sample": true,
+ "asOf": "2026-10-16",
+ "req": {
+  "title": "VP, Compliance Technology",
+  "dept": "Legal & Compliance",
+  "hm": "Jordan Ellis",
+  "priority": "High",
+  "opened": "2026-08-24",
+  "targetClose": "2026-10-30",
+  "tier": "People Leader",
+  "benchDays": 66,
+  "state": "In Flight"
+ },
+ "headline": "Day 53 of 66 with no offer extended; the furthest candidate is at Final Interview. The slowest stage is HM Interview → Interview Round 2 at 19.0 days against a 7-day target, and Submit → Interview Time is also Delayed at 14.3 days. Interview scorecards are returning in 2.0 days on average.",
+ "metrics": [
+  {
+   "label": "Time to Fill",
+   "value": "Day 53 of 66",
+   "sub": "Req opened → Offer Accepted",
+   "bar": 80,
+   "status": "On Time",
+   "bench": "Target: 66d (People Leader)",
+   "note": "No offer yet. 80% of target used; 13 days remain.",
+   "src": "ATS",
+   "days": 53,
+   "target": 66
+  },
+  {
+   "label": "Submit → Interview Time",
+   "value": "14.3d",
+   "sub": "HM Review → HM Interview, avg",
+   "status": "Delayed",
+   "bench": "Target: 7d (stage target) · +7.3d",
+   "note": "n=4. Range 8d to 23d. Includes scheduling time on all sides.",
+   "src": "ATS stage dates"
+  },
+  {
+   "label": "Interview-to-Offer Ratio",
+   "value": "—",
+   "sub": "No offer on this req yet",
+   "status": "No Data",
+   "bench": "Historical avg: 25% (1 offer per 4 HM interviews, 4 closed reqs)",
+   "note": "Reference only.",
+   "src": "ATS"
+  },
+  {
+   "label": "Screen → Submit",
+   "value": "56%",
+   "sub": "5 of 9 screened reached HM Review",
+   "status": "On Time",
+   "bench": "Historical avg: 50% · +6 pts",
+   "note": "n=9.",
+   "src": "ATS"
+  },
+  {
+   "label": "Time in Stage",
+   "value": "19.0d",
+   "sub": "Slowest stage: HM Interview → Interview Round 2",
+   "status": "Delayed",
+   "bench": "Target: 7d (stage target) · +12.0d",
+   "note": "n=2 for that stage. 2 candidates sit 5+ days in current stage.",
+   "src": "ATS stage dates"
+  }
+ ],
+ "stages": [
+  {
+   "name": "Recruiter Screen",
+   "reached": 9,
+   "active": 1
+  },
+  {
+   "name": "HM Review",
+   "reached": 5,
+   "active": 1
+  },
+  {
+   "name": "HM Interview",
+   "reached": 4,
+   "active": 1
+  },
+  {
+   "name": "Interview Round 2",
+   "reached": 2,
+   "active": 1
+  },
+  {
+   "name": "Final Interview",
+   "reached": 1,
+   "active": 1
+  },
+  {
+   "name": "Offer Accepted",
+   "reached": 0,
+   "active": 0
+  },
+  {
+   "name": "Hired",
+   "reached": 0,
+   "active": 0
+  }
+ ],
+ "velocity": [
+  {
+   "label": "Recruiter Screen → HM Review",
+   "avg": 8.8,
+   "n": 5,
+   "bench": 3
+  },
+  {
+   "label": "HM Review → HM Interview",
+   "avg": 14.3,
+   "n": 4,
+   "bench": 7
+  },
+  {
+   "label": "HM Interview → Interview Round 2",
+   "avg": 19,
+   "n": 2,
+   "bench": 7
+  },
+  {
+   "label": "Interview Round 2 → Final Interview",
+   "avg": 13,
+   "n": 1,
+   "bench": 7
+  },
+  {
+   "label": "Final Interview → Offer Accepted",
+   "avg": null,
+   "n": 0,
+   "bench": 7
+  }
+ ],
+ "sources": [
+  {
+   "name": "LinkedIn",
+   "n": 3
+  },
+  {
+   "name": "Job Board",
+   "n": 2
+  },
+  {
+   "name": "Referral",
+   "n": 1
+  },
+  {
+   "name": "Executive Search",
+   "n": 1
+  },
+  {
+   "name": "HireEZ",
+   "n": 1
+  },
+  {
+   "name": "Direct",
+   "n": 1
+  }
+ ],
+ "candidates": [
+  {
+   "name": "Maya Chen",
+   "stage": "Final Interview",
+   "days": 4,
+   "source": "Referral",
+   "dates": "Screen 9/3 · HMI 9/16 · Round 2 9/29 · Final 10/12",
+   "score": "2 scorecards received: advance (themes: regulatory-tech depth, program ownership). Final-round scorecards outstanding."
+  },
+  {
+   "name": "Daniel Okafor",
+   "stage": "Interview Round 2",
+   "days": 3,
+   "source": "LinkedIn",
+   "dates": "Screen 9/2 · HMI 9/18 · Round 2 10/13",
+   "score": "2 scorecards received: advance with reservations (vendor-selection depth)."
+  },
+  {
+   "name": "Priya Raman",
+   "stage": "HM Interview",
+   "days": 6,
+   "source": "Executive Search",
+   "dates": "Screen 9/10 · Sub 9/17 · HMI 10/10",
+   "score": "1 scorecard received: mixed. Debrief pending."
+  },
+  {
+   "name": "Sofia Marchetti",
+   "stage": "HM Review",
+   "days": 15,
+   "source": "LinkedIn",
+   "dates": "Screen 9/15 · Sub 10/1",
+   "score": "No HM interview scheduled as of 10/16."
+  },
+  {
+   "name": "Ethan Brooks",
+   "stage": "Recruiter Screen",
+   "days": 4,
+   "source": "Job Board",
+   "dates": "Screen 10/12",
+   "score": "Not yet submitted to HM."
+  }
+ ],
+ "exits": "Exited: Lena Kowalski, Marcus Webb, Aisha Patel (after Recruiter Screen); Tom Reyes (after HM Interview).",
+ "timeline": [
+  {
+   "d": "2026-08-24",
+   "lane": 0,
+   "t": "Req opened",
+   "k": "m",
+   "label": "Opened",
+   "dy": -11
+  },
+  {
+   "d": "2026-08-26",
+   "lane": 0,
+   "t": "Kickoff call with HM",
+   "k": "m",
+   "label": "Kickoff",
+   "dy": 15
+  },
+  {
+   "d": "2026-09-02",
+   "lane": 1,
+   "t": "Screen: Daniel Okafor",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-03",
+   "lane": 1,
+   "t": "Screen: Maya Chen",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-04",
+   "lane": 1,
+   "t": "Screen: Lena Kowalski",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-09",
+   "lane": 1,
+   "t": "Screen: Marcus Webb",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-10",
+   "lane": 1,
+   "t": "Screen: Priya Raman",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-11",
+   "lane": 1,
+   "t": "Screen: Aisha Patel",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-12",
+   "lane": 1,
+   "t": "Screen: Tom Reyes",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-15",
+   "lane": 1,
+   "t": "Screen: Sofia Marchetti",
+   "k": "s"
+  },
+  {
+   "d": "2026-10-12",
+   "lane": 1,
+   "t": "Screen: Ethan Brooks",
+   "k": "s"
+  },
+  {
+   "d": "2026-09-08",
+   "lane": 2,
+   "t": "Submitted: Maya Chen",
+   "k": "b"
+  },
+  {
+   "d": "2026-09-08",
+   "lane": 2,
+   "t": "Submitted: Daniel Okafor",
+   "k": "b"
+  },
+  {
+   "d": "2026-09-17",
+   "lane": 2,
+   "t": "Submitted: Priya Raman",
+   "k": "b"
+  },
+  {
+   "d": "2026-09-22",
+   "lane": 2,
+   "t": "Submitted: Tom Reyes",
+   "k": "b"
+  },
+  {
+   "d": "2026-10-01",
+   "lane": 2,
+   "t": "Submitted: Sofia Marchetti",
+   "k": "b"
+  },
+  {
+   "d": "2026-09-16",
+   "lane": 3,
+   "t": "HM Interview: Maya Chen",
+   "k": "i"
+  },
+  {
+   "d": "2026-09-18",
+   "lane": 3,
+   "t": "HM Interview: Daniel Okafor",
+   "k": "i"
+  },
+  {
+   "d": "2026-09-29",
+   "lane": 3,
+   "t": "Interview Round 2: Maya Chen",
+   "k": "i"
+  },
+  {
+   "d": "2026-10-07",
+   "lane": 3,
+   "t": "HM Interview: Tom Reyes",
+   "k": "i"
+  },
+  {
+   "d": "2026-10-10",
+   "lane": 3,
+   "t": "HM Interview: Priya Raman",
+   "k": "i"
+  },
+  {
+   "d": "2026-10-12",
+   "lane": 3,
+   "t": "Final: Maya Chen",
+   "k": "i"
+  },
+  {
+   "d": "2026-10-13",
+   "lane": 3,
+   "t": "Interview Round 2: Daniel Okafor",
+   "k": "i"
+  },
+  {
+   "d": "2026-09-17",
+   "lane": 4,
+   "t": "Scorecard received: Maya Chen HMI (1d)",
+   "k": "c"
+  },
+  {
+   "d": "2026-09-19",
+   "lane": 4,
+   "t": "Debrief: Maya Chen and Daniel Okafor (HMI)",
+   "k": "x"
+  },
+  {
+   "d": "2026-09-20",
+   "lane": 4,
+   "t": "Scorecard received: Daniel Okafor HMI (2d)",
+   "k": "c"
+  },
+  {
+   "d": "2026-10-01",
+   "lane": 4,
+   "t": "Scorecard received: Maya Chen Round 2 (2d)",
+   "k": "c"
+  },
+  {
+   "d": "2026-10-02",
+   "lane": 4,
+   "t": "Debrief: Maya Chen (Round 2)",
+   "k": "x"
+  },
+  {
+   "d": "2026-10-09",
+   "lane": 4,
+   "t": "Scorecard received: Tom Reyes HMI (2d)",
+   "k": "c"
+  },
+  {
+   "d": "2026-10-09",
+   "lane": 4,
+   "t": "Debrief: Tom Reyes (HMI)",
+   "k": "x"
+  },
+  {
+   "d": "2026-10-13",
+   "lane": 4,
+   "t": "Scorecard received: Priya Raman HMI (3d)",
+   "k": "c"
+  },
+  {
+   "d": "2026-10-15",
+   "lane": 4,
+   "t": "Scorecard received: Daniel Okafor Round 2 (2d)",
+   "k": "c"
+  }
+ ],
+ "efficient": [
+  {
+   "t": "<b>Screen → Submit 56%</b> vs. 50% historical avg (5 of 9 screened).",
+   "s": "ATS"
+  },
+  {
+   "t": "<b>Scorecard turnaround averages 2.0 days</b> across 6 scorecards (range 1d to 3d).",
+   "s": "Email · Calendar"
+  },
+  {
+   "t": "<b>HM Review → HM Interview pass-through is 80%</b> (4 of 5 submitted candidates interviewed).",
+   "s": "ATS"
+  }
+ ],
+ "bottlenecks": [
+  {
+   "t": "<b>Recruiter Screen → HM Review averages 9 days</b> vs. 3-day target (n=5, range 5d to 16d).",
+   "s": "ATS"
+  },
+  {
+   "t": "<b>HM Review → HM Interview averages 14.3 days</b> vs. 7-day target (n=4, range 8d to 23d).",
+   "s": "ATS"
+  },
+  {
+   "t": "<b>HM Interview → Interview Round 2 averages 19 days</b> vs. 7-day target (n=2).",
+   "s": "ATS"
+  },
+  {
+   "t": "<b>Sofia Marchetti has been in HM Review 15 days</b>; no HM interview on the calendar.",
+   "s": "ATS · Calendar"
+  },
+  {
+   "t": "<b>Final-round scorecards for Maya Chen are outstanding 4 days</b> after the 10/12 interview (average turnaround 2.0d).",
+   "s": "Email"
+  }
+ ],
+ "intel": {
+  "standouts": [
+   {
+    "t": "<b>Maya Chen:</b> HM Interview and Interview Round 2 scorecards cite regulatory-tech depth and ownership of a multi-year program at a prior employer.",
+    "s": "Scorecards 9/17, 10/1"
+   },
+   {
+    "t": "<b>Daniel Okafor:</b> scorecard themes point to strong cross-team stakeholder management, with one reservation on hands-on vendor selection.",
+    "s": "Scorecards 9/20, 10/15"
+   }
+  ],
+  "market": [
+   {
+    "t": "Candidates use \"RegTech\" and \"surveillance modernization\"; the HM prefers \"controls automation.\" GRC-platform experience screens well.",
+    "s": "Kickoff 8/26; Screens"
+   },
+   {
+    "t": "Two candidates mentioned active processes at asset managers, which points to a compressed decision window.",
+    "s": "Screens 9/3, 9/10"
+   }
+  ],
+  "risks": [
+   {
+    "t": "<b>Priya Raman</b> mentioned a 90-day notice period, which could push a start date well past offer.",
+    "s": "Screen 9/10"
+   },
+   {
+    "t": "<b>Maya Chen</b> mentioned a competing late-stage process.",
+    "s": "Screen 9/3"
+   },
+   {
+    "t": "HM interview availability was described as limited to Tuesdays and Thursdays, which constrains scheduling.",
+    "s": "Kickoff 8/26"
+   }
+  ]
+ },
+ "options": [
+  {
+   "h": "Add a recurring submission-review slot with the HM",
+   "p": "A standing 15-minute weekly slot could shorten the HM Review → HM Interview wait.",
+   "tie": "Tied to: 14.3d avg vs. 7d target; Sofia Marchetti at 15d in stage."
+  },
+  {
+   "h": "Submit within the 3-day target and pre-hold HM windows",
+   "p": "Submitting within 3 days of the screen, with Tuesday/Thursday HM slots reserved ahead of time, could cut both the submission and scheduling waits.",
+   "tie": "Tied to: 8.8d avg vs. 3d target; Tue/Thu availability noted at kickoff; Ethan not yet submitted."
+  },
+  {
+   "h": "Request Final-round scorecards by a set date",
+   "p": "A stated deadline for the committee could bring Final feedback in line with the 2.0-day average.",
+   "tie": "Tied to: Maya Chen Final scorecards outstanding 4 days; competing process noted 9/3."
+  }
+ ],
+ "confidence": {
+  "sources": [
+   [
+    "ATS export",
+    "ats-export-2026-10-15.json",
+    "Stage dates, status, metrics (1 day old)"
+   ],
+   [
+    "Calendar",
+    "Plan A, connected",
+    "24 of 25 events matched to candidates"
+   ],
+   [
+    "Email",
+    "Plan A, connected",
+    "6 scorecards, committee and HM threads"
+   ],
+   [
+    "Meeting transcripts",
+    "Plan A, connected",
+    "Kickoff, 4 screens, 2 debriefs. Qualitative sections only."
+   ]
+  ],
+  "conflicts": [
+   "Tom Reyes HM Interview: calendar shows 10/7, ATS shows 10/8. Calendar date used for the timeline and scorecard turnaround; ATS date used for stage metrics (1-day difference).",
+   "Ethan Brooks: calendar shows screen invites on 10/12 and 10/15; ATS shows 10/12 only. Confirm whether 10/15 was a separate step."
+  ],
+  "unmatched": [
+   "Calendar event \"Intro call - R. Haines\" (10/6) matches no candidate in ATS."
+  ],
+  "notes": "Not included in this brief: compensation and market pay ranges. Contains candidate-level information (names, notice periods, competing processes); share with the hiring team only. 0 candidates excluded for missing stage dates. Stage-time targets are fixed (3d, then 7d per stage). The Screen → Submit rate and Interview-to-Offer ratio use a historical average from 4 closed reqs. Small samples (n shown on each metric) limit how far any single figure should be read."
+ },
+ "fileLabel": "Funnel export",
+ "file": "ats-export-2026-10-15.json",
+ "systemName": "ATS"
+};
+
+const D = BRIEF_DATA;
+const SC = { 'On Time':'var(--ok)', 'At Risk':'var(--warn)', 'Delayed':'var(--bad)', 'No Data':'var(--nodata)' };
+const ms = s => Date.parse(s + 'T00:00:00Z');
+const dd = (a, b) => Math.round((ms(b) - ms(a)) / 86400000);
+const fmt = s => new Date(ms(s)).toLocaleDateString('en-US', { month:'short', day:'numeric', timeZone:'UTC' });
+const age = d => d <= 2 ? 'var(--ok)' : d <= 4 ? 'var(--warn)' : 'var(--bad)';
+const JET = 'M12 2C13 2 13.8 3.2 13.8 5V9.5L22 15V17L13.8 14.6V18.2L16.5 20.2V21.8L12 20.6L7.5 21.8V20.2L10.2 18.2V14.6L2 17V15L10.2 9.5V5C10.2 3.2 11 2 12 2Z';
+const jet = (rot, fill, size) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true"><g transform="rotate(${rot} 12 12)"><path d="${JET}" fill="${fill}"/></g></svg>`;
+const logo = `<svg viewBox="0 -6 64 70" width="34" height="37" aria-hidden="true"><rect x="6" y="40" width="10" height="18" rx="2.5" fill="#26312c"/><rect x="19" y="32" width="10" height="26" rx="2.5" fill="#26312c"/><rect x="32" y="22" width="10" height="36" rx="2.5" fill="#125740"/><rect x="45" y="12" width="10" height="46" rx="2.5" fill="#0b0f0d"/><path d="M6 30 L44 6" stroke="#0b0f0d" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 5"/><g transform="translate(51 2) rotate(58) scale(.46) translate(-12 -12)"><path d="${JET}" fill="#0b0f0d" fill-opacity=".85"/></g></svg>`;
+const status = s => `<span class="status" style="color:${SC[s]}"><i class="dot" style="background:${SC[s]};margin-right:8px"></i>${s}</span>`;
+const lbl = t => `<div class="lbl">${t}</div>`;
+
+function side() {
+  const r = D.req, c = { 'On Time':0, 'At Risk':0, 'Delayed':0, 'No Data':0 };
+  D.metrics.forEach(m => c[m.status]++);
+  const f = (k, v, s) => `<div class="f"><div class="k">${k}</div><div class="v">${v}${s ? `<small>${s}</small>` : ''}</div></div>`;
+  return `<aside class="side">
+    <div class="brand">${logo}<div><div class="bn">Flight Status</div><div class="bs">Req Status Update</div></div></div>
+    <div class="counts">${Object.keys(c).map(k => `<span><i class="dot" style="background:${SC[k]}"></i>${c[k]} ${k}</span>`).join('')}</div>
+    <div class="facts">
+      ${f('Department', r.dept)}${f('Hiring manager', r.hm)}${f('Priority', r.priority)}${f('Level', r.tier)}
+      ${f('Opened', fmt(r.opened))}${f('Target close', fmt(r.targetClose))}${f('As of', fmt(D.asOf), D.fileLabel + ': ' + D.file)}
+    </div>
+  </aside>`;
+}
+
+function hero() {
+  const t = D.metrics[0], r = D.req;
+  const unit = r.state === 'Landed' ? `days to fill, target ${t.target}` : r.state === 'Canceled' ? `days open, target ${t.target}` : `of ${t.target} days`;
+  return `<div class="sec"><div class="eyebrow">${r.state}</div><h1>${r.title}</h1></div>
+  <div class="hero">
+    <div><div class="big">${t.days}</div><div class="bigsub"><span>${unit} · Time to Fill</span>${status(t.status)}</div>${t.src?`<div class="src" style="margin-top:8px">Source: ${t.src}</div>`:''}</div>
+    <p class="head">${D.headline}</p>
+  </div>`;
+}
+
+function runway() {
+  const S = D.stages, n = S.length;
+  let cur = -1; S.forEach((s, i) => { if (s.active > 0) cur = i; });
+  if (cur < 0) S.forEach((s, i) => { if (s.reached > 0) cur = i; });
+  const marker = cur >= 0 ? `<div class="plane" style="left:calc(100% * ${cur + .5} / ${n} - 10px)">${jet(90, 'var(--accent)', 20)}</div>` : '';
+  const aria = 'Pipeline route: ' + S.map(s => `${s.reached} reached ${s.name}`).join(', ');
+  return `<div class="sec">${lbl('Runway · candidates who reached each stage, and pass-through from the prior stage')}
+  <div class="runway">${marker}<div class="tiles" role="img" aria-label="${aria}">
+    ${S.map((s, i) => {
+      const pass = i > 0 && S[i - 1].reached > 0 ? Math.round(s.reached / S[i - 1].reached * 100) + '% pass' : (i === 0 ? 'entered' : '');
+      return `<div class="t${i === cur ? ' cur' : ''}${s.reached === 0 ? ' zero' : ''}"><div class="tn">${s.reached}</div><div class="tl">${s.name}</div><div class="pt">${s.reached === 0 ? '' : pass}</div></div>`;
+    }).join('')}
+  </div></div></div>
+  ${D.sources && D.sources.length ? mix() : ''}`;
+}
+
+function mix() {
+  const src = D.sources.slice().sort((a, b) => b.n - a.n), tot = src.reduce((a, s) => a + s.n, 0), mx = src[0].n;
+  return `<div class="sec">${lbl('Source mix · where the ' + tot + ' candidates who entered came from')}<div>${src.map(s =>
+    `<div class="sm" title="${s.name}: ${s.n} of ${tot} (${Math.round(s.n / tot * 100)}%)"><div class="sn">${s.name}</div><div class="sb"><i style="width:${s.n / mx * 100}%"></i></div><div class="sv"><b>${s.n}</b> <span>${Math.round(s.n / tot * 100)}%</span></div></div>`).join('')}</div></div>`;
+}
+
+function metrics() {
+  return `<div class="sec">${lbl('Key metrics')}<div class="grid">${D.metrics.slice(1).map(m => {
+    const flag = m.status === 'At Risk' || m.status === 'Delayed';
+    const col = flag ? SC[m.status] : 'var(--text)';
+    return `<div class="m${flag ? ' flag' : ''}" style="${flag ? 'border-top-color:' + SC[m.status] : ''}">
+      <div class="k" style="font-size:11px;letter-spacing:.1em;margin:0">${m.label}</div>
+      <div class="mv" style="color:${m.value==='\u2014'?'var(--muted)':col}">${m.value}</div>
+      <div class="ms">${m.sub}</div>${status(m.status)}
+      <div class="mn">${m.bench}. ${m.note}</div>${m.src?`<div class="src">Source: ${m.src}</div>`:''}</div>`;
+  }).join('')}</div></div>`;
+}
+
+function velocity() {
+  const mx = Math.max(25, ...D.velocity.map(v => (v.avg || 0) * 1.15), ...D.velocity.map(v => v.bench * 2.4));
+  return `<div class="sec">${lbl('Time between stages · average days vs target')}<div>${D.velocity.map(v => {
+    if (v.avg == null) return `<div class="vr"><div class="vl">${v.label}</div><div class="vb"></div><div class="vv"><span>No Data</span></div></div>`;
+    const c = v.avg <= v.bench ? 'var(--ok)' : v.avg <= 2 * v.bench ? 'var(--warn)' : 'var(--bad)';
+    return `<div class="vr"><div class="vl">${v.label}</div><div class="vb"><i style="width:${v.avg / mx * 100}%;background:${c}"></i><b style="left:${v.bench / mx * 100}%"></b></div><div class="vv"><b style="color:${c}">${v.avg}d</b> <span>vs ${v.bench}d · n=${v.n}</span></div></div>`;
+  }).join('')}</div><div class="foot">Dark tick marks the target. Bars use the same thresholds as the status tags.</div></div>`;
+}
+
+function candidates() {
+  return `<div class="sec">${lbl('Candidates in flight')}<div>${D.candidates.map(c => `<div class="c">
+    <div class="c1"><div class="cn">${c.name}</div><div class="cs">${c.source}</div></div>
+    <div class="c2"><div class="cst">${c.stage}</div><div class="cd" style="color:${age(c.days)}">${c.days} days in stage</div></div>
+    <div class="c3"><div class="csc">${c.score}</div><div class="cdt">${c.dates}</div></div></div>`).join('')}</div>
+    <div class="exits">${D.exits}</div></div>`;
+}
+
+function timeline() {
+  const lanes = ['Milestones', 'Screens', 'Submitted', 'Interviews', 'Scorecards and debriefs'];
+  const col = { m:'var(--ev-milestone)', s:'var(--ev-screen)', b:'var(--ev-submit)', i:'var(--ev-interview)', c:'var(--ev-feedback)', x:'var(--ev-feedback)' };
+  const span = Math.max(1, dd(D.req.opened, D.asOf)), X0 = 150, W = 650, x = d => X0 + dd(D.req.opened, d) / span * W;
+  const used = {};
+  let g = '';
+  lanes.forEach((nm, k) => { const y = 30 + k * 40; g += `<line x1="${X0}" y1="${y}" x2="${X0 + W + 8}" y2="${y}" stroke="var(--border)"/><text x="0" y="${y + 4}" font-size="12" fill="var(--muted)">${nm}</text>`; });
+  D.timeline.forEach(e => {
+    const y = 30 + e.lane * 40, key = e.lane + '|' + e.d, n = used[key] = (used[key] || 0) + 1, dy = (n - 1) * 9 * (n % 2 ? -1 : 1), cx = x(e.d);
+    g += e.k === 'x'
+      ? `<rect x="${cx - 4.5}" y="${y + dy - 4.5}" width="9" height="9" fill="none" stroke="${col.x}" stroke-width="1.8" transform="rotate(45 ${cx} ${y + dy})"><title>${e.t}, ${fmt(e.d)}</title></rect>`
+      : `<circle cx="${cx}" cy="${y + dy}" r="5" fill="${col[e.k]}"><title>${e.t}, ${fmt(e.d)}</title></circle>`;
+  });
+  const tx = x(D.asOf);
+  g += `<line x1="${tx}" y1="14" x2="${tx}" y2="206" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="3 4"/><text x="${tx - 6}" y="220" font-size="11" fill="var(--bad)" text-anchor="end">As of ${fmt(D.asOf)} · Day ${span}</text>`;
+  for (let d = 0; d <= span; d += 14) { const dt = new Date(ms(D.req.opened) + d * 86400000).toISOString().slice(0, 10); g += `<text x="${x(dt)}" y="242" font-size="11" fill="var(--muted)" text-anchor="middle">${fmt(dt)}</text>`; }
+  return `<div class="sec">${lbl('Activity timeline · ' + fmt(D.req.opened) + ' to ' + fmt(D.asOf))}
+  <svg viewBox="0 0 820 250" role="img" aria-label="Activity timeline" style="width:100%;height:auto;font-family:'IBM Plex Sans','Segoe UI',sans-serif">${g}</svg>
+  <div class="foot">Circles are events; diamonds are debriefs. Scorecard turnaround is in the event titles.</div></div>`;
+}
+
+const items = (arr, w) => arr && arr.length ? arr.map(i => `<div class="li${w ? ' w' : ''}">${i.t}<em>${i.s}</em></div>`).join('') : `<div class="none">No source material</div>`;
+
+function observations() {
+  return `<div class="two"><div class="col">${lbl('What is moving')}<div>${items(D.efficient)}</div></div><div class="col">${lbl('Where it is stuck')}<div>${items(D.bottlenecks, true)}</div></div></div>`;
+}
+
+function insights() {
+  const I = D.intel;
+  return `<div class="sec">${lbl('Search insights')}<div class="three">
+    <div><div class="sub3">Standout candidates</div>${items(I.standouts)}</div>
+    <div><div class="sub3">Market and role</div>${items(I.market)}</div>
+    <div><div class="sub3 w">Risks to watch</div>${items(I.risks, true)}</div></div></div>`;
+}
+
+function options() {
+  return `<div class="sec">${lbl('Options to consider · suggestions, not conclusions')}<div>${D.options.map((o, i) => `<div class="o"><div class="on">${i + 1}</div><div><div class="oh">${o.h}</div><div class="op">${o.p}</div><div class="ot">${o.tie}</div></div></div>`).join('')}</div></div>`;
+}
+
+function confidence() {
+  const C = D.confidence;
+  return `<div class="sec">${lbl('Data confidence and reconciliation')}<div>${C.sources.map(s => `<div class="sr"><div>${s[0]}</div><div>${s[1]}</div><div>${s[2]}</div></div>`).join('')}</div>
+  <div class="cf"><b>Source conflicts and possible ${D.systemName} updates.</b> ${C.conflicts.join(' ')}<br><b>Unmatched.</b> ${C.unmatched.join(' ')}<br><b>Notes.</b> ${C.notes}</div></div>`;
+}
+
+function render() {
+  document.getElementById('app').innerHTML = side() + `<main class="main">${hero()}${metrics()}${runway()}${velocity()}${candidates()}${timeline()}${observations()}${insights()}${options()}${confidence()}
+  <div class="foot">${D.sample ? 'Sample output · fictional data' : D.footerNote || ''}</div></main>`;
+}
+render();
+</script>
+</body>
+</html>

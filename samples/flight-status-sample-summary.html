@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flight Status Summary | VP, Compliance Technology (sample)</title>
+<link rel="icon" id="fav" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f2f2f1'/%3E%3Crect x='10' y='40' width='9' height='16' rx='2.5' fill='%2326312c'/%3E%3Crect x='22' y='32' width='9' height='24' rx='2.5' fill='%2326312c'/%3E%3Crect x='34' y='22' width='9' height='34' rx='2.5' fill='%23125740'/%3E%3Crect x='46' y='12' width='9' height='44' rx='2.5' fill='%230b0f0d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f2f1;--border:#d6dbd8;--muted:#66706a;--soft:#1f2925;--soft2:#36423c;--text:#0b0f0d;--block:#26312c;--accent:#125740;--deep:#e3e8e5;--onblock:#ffffff;--ok:#1f8a5b;--warn:#b5780c;--bad:#c2382c;--nodata:#66706a;--display:'Bricolage Grotesque','IBM Plex Sans','Segoe UI',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 'IBM Plex Sans','Segoe UI',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{max-width:980px;margin:0 auto;padding:32px 44px 40px;display:flex;flex-direction:column;gap:30px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 24px}
+.brand{display:flex;align-items:center;gap:11px}
+.bn{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:-.01em;line-height:1.1;white-space:nowrap}
+.bs{font-size:12px;color:var(--muted);margin-top:3px}
+.asof{font-size:12px;color:var(--muted);text-align:right;line-height:1.5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{margin:6px 0 0;font-family:var(--display);font-weight:700;font-size:clamp(30px,4.4vw,44px);line-height:1.04;letter-spacing:-.03em}
+.sub{font-size:13px;color:var(--muted);margin-top:8px}
+.hero{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:flex-end}
+.big{font-family:var(--display);font-weight:800;font-size:clamp(88px,12vw,132px);line-height:.82;letter-spacing:-.05em;color:var(--accent)}
+.bigsub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:14px;color:var(--soft2);margin-top:12px}
+.head{flex:1 1 280px;min-width:0;margin:0;font-size:16.5px;line-height:1.6;color:var(--soft)}
+.lbl{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.status{font-weight:600}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:baseline}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:24px}
+.m{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.m.flag{border-top:3px solid var(--warn);padding-top:10px}
+.k{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mv{white-space:nowrap;font-family:var(--display);font-weight:700;font-size:34px;line-height:1;letter-spacing:-.03em}
+.mv .u{font-size:16px;font-weight:600;letter-spacing:0;margin-left:5px}
+.mn{font-size:12px;color:var(--muted);line-height:1.45}
+.runway{position:relative;padding-top:30px}
+.plane{position:absolute;top:0;width:20px;height:20px}
+.tiles{display:flex;gap:4px}
+.t{flex:1;min-width:0;background:var(--block);color:var(--onblock);padding:10px 8px 9px}
+.t:first-child{border-radius:8px 0 0 8px}.t:last-child{border-radius:0 8px 8px 0}
+.t.cur{background:var(--accent)}.t.zero{background:var(--deep);color:var(--muted)}
+.tn{font-family:var(--display);font-weight:800;font-size:24px;line-height:1}
+.tl{font-size:11px;font-weight:500;margin-top:6px;line-height:1.25}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px}
+.c{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:9px 0;border-top:1px solid var(--border)}
+.cn{font-family:var(--display);font-weight:700;font-size:16px}
+.cs{font-size:12px;color:var(--muted);margin-top:2px}
+.cr{font-size:13px;text-align:right}.cr b{color:var(--accent);font-weight:600}.sc{font-size:12px;color:var(--muted);margin-top:2px}
+.ex{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:9px}
+.li{padding:9px 0 9px 14px;border-top:1px solid var(--border);border-left:3px solid var(--warn);margin-top:-1px;font-size:13.5px;line-height:1.5;color:var(--soft)}
+.o{display:flex;gap:16px;padding:10px 0;border-top:1px solid var(--border)}
+.on{font-family:var(--display);font-weight:800;font-size:28px;line-height:.95;color:var(--accent);flex:0 0 28px}
+.oh{font-weight:600;font-size:14px}.op{font-size:13.5px;color:var(--soft);margin-top:2px}
+.foot{font-size:11.5px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:12px}
+svg{display:block}
+@media(max-width:620px){.page{padding:24px 20px 32px}.tl{font-size:9.5px}.tn{font-size:20px}.t{padding:8px 5px}.plane{display:none}.runway{padding-top:0}.asof{text-align:left}}
+@media print{.page{padding:0;max-width:none}.c,.o,.li,.m{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="page" id="app"></div>
+<script>
+// ───────────────────────────────────────────────────────────────────────────
+// LAYOUT TEMPLATE ONLY. Short brief for hiring managers and executives.
+// Replace null with a SEPARATE, reduced dataset (shape: references/flight-status-spec.md, "Short brief").
+// It must contain only the fields listed there, so nothing sensitive is in the page source.
+// ───────────────────────────────────────────────────────────────────────────
+const BRIEF_DATA = {
+ "sample": false,
+ "asOf": "2026-10-16",
+ "file": "ats-export-2026-10-15.json",
+ "req": {
+  "title": "VP, Compliance Technology",
+  "dept": "Legal & Compliance",
+  "hm": "Jordan Ellis",
+  "priority": "High",
+  "level": "People Leader",
+  "opened": "2026-08-24",
+  "targetClose": "2026-10-30",
+  "state": "In Flight"
+ },
+ "headline": "Day 53 of 66 with no offer yet. The slowest step is HM Interview to Interview Round 2 at 19.0 days against a 7-day target.",
+ "metrics": [
+  {
+   "label": "Time to Fill",
+   "value": "Day 53 of 66",
+   "status": "On Time",
+   "bench": "Target: 66d (People Leader)",
+   "days": 53,
+   "target": 66
+  },
+  {
+   "label": "Submit → Interview Time",
+   "value": "14.3d",
+   "status": "Delayed",
+   "bench": "Target: 7d (stage target) · +7.3d"
+  },
+  {
+   "label": "Interview-to-Offer Ratio",
+   "value": "—",
+   "status": "No Data",
+   "bench": "Historical avg: 25% (1 offer per 4 HM interviews, 4 closed reqs)"
+  },
+  {
+   "label": "Screen → Submit",
+   "value": "56%",
+   "status": "On Time",
+   "bench": "Historical avg: 50% · +6 pts"
+  },
+  {
+   "label": "Time in Stage",
+   "value": "19.0d",
+   "status": "Delayed",
+   "bench": "Target: 7d (stage target) · +12.0d"
+  }
+ ],
+ "stages": [
+  {
+   "name": "Recruiter Screen",
+   "reached": 9,
+   "active": 1
+  },
+  {
+   "name": "HM Review",
+   "reached": 5,
+   "active": 1
+  },
+  {
+   "name": "HM Interview",
+   "reached": 4,
+   "active": 1
+  },
+  {
+   "name": "Interview Round 2",
+   "reached": 2,
+   "active": 1
+  },
+  {
+   "name": "Final Interview",
+   "reached": 1,
+   "active": 1
+  },
+  {
+   "name": "Offer Accepted",
+   "reached": 0,
+   "active": 0
+  },
+  {
+   "name": "Hired",
+   "reached": 0,
+   "active": 0
+  }
+ ],
+ "candidates": [
+  {
+   "name": "Maya Chen",
+   "source": "Referral",
+   "stage": "Final Interview",
+   "days": 4,
+   "scorecard": "Scorecards: 2 received, final round pending"
+  },
+  {
+   "name": "Daniel Okafor",
+   "source": "LinkedIn",
+   "stage": "Interview Round 2",
+   "days": 3,
+   "scorecard": "Scorecards: 2 received"
+  },
+  {
+   "name": "Priya Raman",
+   "source": "Executive Search",
+   "stage": "HM Interview",
+   "days": 6,
+   "scorecard": "Scorecard: 1 received, debrief pending"
+  },
+  {
+   "name": "Sofia Marchetti",
+   "source": "LinkedIn",
+   "stage": "HM Review",
+   "days": 15,
+   "scorecard": "No interview yet"
+  },
+  {
+   "name": "Ethan Brooks",
+   "source": "Job Board",
+   "stage": "Recruiter Screen",
+   "days": 4,
+   "scorecard": "No interview yet"
+  }
+ ],
+ "exits": "4 candidates have exited the search.",
+ "holdingUp": [
+  "HM Interview to Interview Round 2 averages 19.0 days against a 7-day target.",
+  "Submit to Interview time is 14.3 days against a 7-day target."
+ ],
+ "nextSteps": [
+  {
+   "title": "Hold interview slots in advance",
+   "text": "Reserve slots as soon as a candidate reaches HM Review."
+  },
+  {
+   "title": "Return scorecards within 2 days",
+   "text": "A final-round scorecard and one debrief are pending."
+  }
+ ],
+ "footer": "Share-safe summary: compensation, market pay ranges, notice periods, competing processes and candidate-level risks are not included. Candidate names are shown. Data confidence: 2 source conflicts and 1 unmatched calendar event are listed in the full brief. Sources: ATS export, calendar, email. Full brief available from the recruiting team. This sample uses fictional data."
+};
+if (BRIEF_DATA === null || BRIEF_DATA.sample !== false || !BRIEF_DATA.req || !BRIEF_DATA.req.title) {
+  document.body.innerHTML = '<p style="font:16px sans-serif;padding:40px">Layout template: BRIEF_DATA has not been filled in with a real requisition. Do not deliver this file.</p>';
+  throw new Error('Flight Status short layout template: BRIEF_DATA is null, sample, or missing req.title');
+}
+const D = BRIEF_DATA;
+const SC = { 'On Time':'var(--ok)', 'At Risk':'var(--warn)', 'Delayed':'var(--bad)', 'No Data':'var(--nodata)' };
+const ms = s => Date.parse(s + 'T00:00:00Z');
+const dd = (a, b) => Math.round((ms(b) - ms(a)) / 86400000);
+const fmt = s => new Date(ms(s)).toLocaleDateString('en-US', { month:'short', day:'numeric', timeZone:'UTC' });
+const age = d => d <= 2 ? 'var(--ok)' : d <= 4 ? 'var(--warn)' : 'var(--bad)';
+const JET = 'M12 2C13 2 13.8 3.2 13.8 5V9.5L22 15V17L13.8 14.6V18.2L16.5 20.2V21.8L12 20.6L7.5 21.8V20.2L10.2 18.2V14.6L2 17V15L10.2 9.5V5C10.2 3.2 11 2 12 2Z';
+const jet = (rot, fill, size) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true"><g transform="rotate(${rot} 12 12)"><path d="${JET}" fill="${fill}"/></g></svg>`;
+const logo = `<svg viewBox="0 -6 64 70" width="34" height="37" aria-hidden="true"><rect x="6" y="40" width="10" height="18" rx="2.5" fill="#26312c"/><rect x="19" y="32" width="10" height="26" rx="2.5" fill="#26312c"/><rect x="32" y="22" width="10" height="36" rx="2.5" fill="#125740"/><rect x="45" y="12" width="10" height="46" rx="2.5" fill="#0b0f0d"/><path d="M6 30 L44 6" stroke="#0b0f0d" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 5"/><g transform="translate(51 2) rotate(58) scale(.46) translate(-12 -12)"><path d="${JET}" fill="#0b0f0d" fill-opacity=".85"/></g></svg>`;
+const status = s => `<span class="status" style="color:${SC[s]}"><i class="dot" style="background:${SC[s]};margin-right:8px"></i>${s}</span>`;
+const lbl = t => `<div class="lbl">${t}</div>`;
+
+
+const lines = (a, cls, n) => a && a.length ? a.map((x, i) => n ? `<div class="o"><div class="on">${i + 1}</div><div><div class="oh">${x.title}</div><div class="op">${x.text}</div></div></div>` : `<div class="${cls}">${x.t}</div>`).join('') : '';
+
+function render() {
+  const r = D.req, t = D.metrics[0], S = D.stages, n = S.length;
+  let cur = -1; S.forEach((s, i) => { if (s.active > 0) cur = i; });
+  if (cur < 0) S.forEach((s, i) => { if (s.reached > 0) cur = i; });
+  const unit = r.state === 'Landed' ? `days to fill, target ${t.target}` : r.state === 'Canceled' ? `days open, target ${t.target}` : `of ${t.target} days`;
+  const plane = cur >= 0 ? `<div class="plane" style="left:calc(100% * ${cur + .5} / ${n} - 10px)">${jet(90, 'var(--accent)', 20)}</div>` : '';
+  const facts = [r.dept, 'Hiring manager: ' + r.hm, 'Priority: ' + r.priority, 'Level: ' + r.level, 'Opened ' + fmt(r.opened), 'Target close ' + fmt(r.targetClose)].join(' · ');
+  const mets = D.metrics.slice(1).map(m => {
+    const flag = m.status === 'At Risk' || m.status === 'Delayed';
+    return `<div class="m${flag ? ' flag' : ''}" style="${flag ? 'border-top-color:' + SC[m.status] : ''}"><div class="k">${m.label}</div>
+      <div class="mv" style="color:${m.value === '\u2014' ? 'var(--muted)' : flag ? SC[m.status] : 'var(--text)'}">${m.value}</div>${status(m.status)}<div class="mn">${m.bench}</div></div>`;
+  }).join('');
+  document.getElementById('app').innerHTML = `
+  <div class="top"><div class="brand">${logo}<div><div class="bn">Flight Status</div><div class="bs">Summary</div></div></div>
+    <div class="asof">As of ${fmt(D.asOf)}<br>${D.file}</div></div>
+  <div><div class="eyebrow">${r.state}</div><h1>${r.title}</h1><div class="sub">${facts}</div></div>
+  <div class="hero"><div><div class="big">${t.days}</div><div class="bigsub"><span>${unit} · Time to Fill</span>${status(t.status)}</div></div>
+    <p class="head">${D.headline}</p></div>
+  <div><div class="lbl">Key metrics</div><div class="grid">${mets}</div></div>
+  <div><div class="lbl">Runway · candidates who reached each stage</div><div class="runway">${plane}<div class="tiles" role="img" aria-label="Pipeline: ${S.map(s => s.reached + ' reached ' + s.name).join(', ')}">
+    ${S.map((s, i) => `<div class="t${i === cur ? ' cur' : ''}${s.reached === 0 ? ' zero' : ''}"><div class="tn">${s.reached}</div><div class="tl">${s.name}</div></div>`).join('')}</div></div></div>
+  <div class="two">
+    <div><div class="lbl">Candidates in flight</div>${D.candidates.map(c => `<div class="c"><div><div class="cn">${c.name}</div><div class="cs">Source: ${c.source}</div></div><div class="cr"><b>${c.stage}</b> · <span style="color:${c.days == null ? 'var(--muted)' : age(c.days)}">${c.days == null ? 'Scheduled' : c.days + ' days'}</span><div class="sc">${c.scorecard}</div></div></div>`).join('')}${D.exits ? `<div class="ex">${D.exits}</div>` : ''}</div>
+    <div><div class="lbl">What is holding us up</div>${lines(D.holdingUp.map(x=>({t:x})), 'li')}</div></div>
+  ${D.nextSteps && D.nextSteps.length ? `<div><div class="lbl">Next steps for the hiring team</div>${lines(D.nextSteps, '', true)}</div>` : ''}
+  <div class="foot">${D.footer}</div>`;
+}
+render();
+</script>
+</body>
+</html>

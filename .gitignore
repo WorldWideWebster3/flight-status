@@ -1,0 +1,13 @@
+# Real briefs contain candidate data. Never commit them.
+flight-status-*-full.html
+flight-status-*-summary.html
+brief*.html
+*-export*.csv
+*-export*.json
+greenlight-*.json
+*.ics
+transcripts/
+# Keep the fictional samples
+!samples/
+!samples/flight-status-sample-*.html
+.DS_Store
